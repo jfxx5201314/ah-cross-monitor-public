@@ -1,7 +1,7 @@
 {
   "mirror": "AH-Cross public read-only status",
-  "mirrored_at": "2026-08-15T22:58:34.345543+00:00",
-  "source_generated_at": "2026-08-15T22:58:34.004029+00:00",
+  "mirrored_at": "2026-08-15T23:27:29.288562+00:00",
+  "source_generated_at": "2026-08-15T23:27:28.924568+00:00",
   "model_version": "0.4.0",
   "build": "V0.4.0-YDC2",
   "overall_status": "OK",
@@ -18,34 +18,34 @@
       "scheduler_enabled": true,
       "checks": {
         "scheduler_heartbeat": {
-          "age_minutes": 3.5,
+          "age_minutes": 2.4,
           "ok": true
         },
         "final_sweep": {
-          "age_minutes": 3.5,
+          "age_minutes": 2.4,
           "ok": true
         },
         "refresh": {
-          "age_minutes": 28.5,
+          "age_minutes": 27.4,
           "ok": true
         },
         "settlement": {
-          "age_minutes": 1.1,
+          "age_minutes": 0.0,
           "ok": true
         },
         "market_rescan": {
-          "age_minutes": 58.5,
+          "age_minutes": 87.4,
           "ok": true
         }
       },
       "single_replica_required_for_internal_scheduler": true
     },
-    "heartbeat_at": "2026-08-15T22:55:06.076609+00:00",
+    "heartbeat_at": "2026-08-15T23:25:07.076445+00:00",
     "daily_scan_at": "2026-08-15T22:00:04.532214+00:00",
-    "refresh_at": "2026-08-15T22:30:05.970905+00:00",
-    "final_sweep_at": "2026-08-15T22:55:06.084731+00:00",
-    "settlement_at": "2026-08-15T22:57:26.932981+00:00",
-    "multisource_sweep_at": "2026-08-15T22:30:05.946752+00:00"
+    "refresh_at": "2026-08-15T23:00:06.979753+00:00",
+    "final_sweep_at": "2026-08-15T23:25:07.087870+00:00",
+    "settlement_at": "2026-08-15T23:27:27.809288+00:00",
+    "multisource_sweep_at": "2026-08-15T23:00:06.954056+00:00"
   },
   "official_final_counts": {
     "total": 115,
@@ -253,7 +253,7 @@
     "enabled": true,
     "guard_enabled": true,
     "profile_version": "PML1",
-    "generated_at": "2026-08-15T22:57:26.883801+00:00",
+    "generated_at": "2026-08-15T23:27:27.758570+00:00",
     "source_rows": 612,
     "diagnosed_rows": 612,
     "label_counts": {
@@ -453,7 +453,7 @@
     "mismatches": {}
   },
   "daily_requests": {
-    "used": 17,
+    "used": 18,
     "limit": 70000,
     "provider_remaining_recent": null
   }
