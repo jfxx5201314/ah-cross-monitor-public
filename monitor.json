@@ -1,7 +1,7 @@
 {
   "mirror": "AH-Cross public read-only status",
-  "mirrored_at": "2026-08-15T19:33:43.855566+00:00",
-  "source_generated_at": "2026-08-15T19:33:43.579783+00:00",
+  "mirrored_at": "2026-08-15T19:55:22.144137+00:00",
+  "source_generated_at": "2026-08-15T19:55:21.769885+00:00",
   "model_version": "0.4.0",
   "build": "V0.4.0-YDC2",
   "overall_status": "OK",
@@ -18,32 +18,32 @@
       "scheduler_enabled": true,
       "checks": {
         "scheduler_heartbeat": {
-          "age_minutes": 3.4,
+          "age_minutes": 0.1,
           "ok": true
         },
         "final_sweep": {
-          "age_minutes": 3.4,
+          "age_minutes": 0.1,
           "ok": true
         },
         "refresh": {
-          "age_minutes": 3.4,
+          "age_minutes": 25.1,
           "ok": true
         },
         "settlement": {
-          "age_minutes": 6.4,
+          "age_minutes": 28.1,
           "ok": true
         },
         "market_rescan": {
-          "age_minutes": 33.5,
+          "age_minutes": 55.1,
           "ok": true
         }
       },
       "single_replica_required_for_internal_scheduler": true
     },
-    "heartbeat_at": "2026-08-15T19:30:17.227088+00:00",
+    "heartbeat_at": "2026-08-15T19:55:17.353588+00:00",
     "daily_scan_at": "2026-08-15T19:00:16.265534+00:00",
     "refresh_at": "2026-08-15T19:30:17.266854+00:00",
-    "final_sweep_at": "2026-08-15T19:30:17.273072+00:00",
+    "final_sweep_at": "2026-08-15T19:55:17.363497+00:00",
     "settlement_at": "2026-08-15T19:27:17.220649+00:00",
     "multisource_sweep_at": "2026-08-15T19:30:17.237994+00:00"
   },
