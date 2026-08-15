@@ -1,7 +1,7 @@
 {
   "mirror": "AH-Cross public read-only status",
-  "mirrored_at": "2026-08-15T16:28:46.763302+00:00",
-  "source_generated_at": "2026-08-15T16:28:46.491942+00:00",
+  "mirrored_at": "2026-08-15T16:53:10.394383+00:00",
+  "source_generated_at": "2026-08-15T16:53:10.090398+00:00",
   "model_version": "0.4.0",
   "build": "V0.4.0-YDC2",
   "overall_status": "OK",
@@ -18,34 +18,34 @@
       "scheduler_enabled": true,
       "checks": {
         "scheduler_heartbeat": {
-          "age_minutes": 3.6,
+          "age_minutes": 3.0,
           "ok": true
         },
         "final_sweep": {
-          "age_minutes": 3.6,
+          "age_minutes": 3.0,
           "ok": true
         },
         "refresh": {
-          "age_minutes": 28.6,
+          "age_minutes": 23.0,
           "ok": true
         },
         "settlement": {
-          "age_minutes": 1.6,
+          "age_minutes": 26.0,
           "ok": true
         },
         "market_rescan": {
-          "age_minutes": 18.6,
+          "age_minutes": 43.0,
           "ok": true
         }
       },
       "single_replica_required_for_internal_scheduler": true
     },
-    "heartbeat_at": "2026-08-15T16:25:09.597449+00:00",
+    "heartbeat_at": "2026-08-15T16:50:10.551753+00:00",
     "daily_scan_at": "2026-08-15T16:10:09.544552+00:00",
-    "refresh_at": "2026-08-15T16:00:09.473994+00:00",
-    "final_sweep_at": "2026-08-15T16:25:09.614161+00:00",
+    "refresh_at": "2026-08-15T16:30:10.491932+00:00",
+    "final_sweep_at": "2026-08-15T16:50:10.564264+00:00",
     "settlement_at": "2026-08-15T16:27:10.454827+00:00",
-    "multisource_sweep_at": "2026-08-15T16:00:09.458500+00:00"
+    "multisource_sweep_at": "2026-08-15T16:30:10.474365+00:00"
   },
   "official_final_counts": {
     "total": 115,
