@@ -1,0 +1,109 @@
+name: AH-Cross Monitor Mirror
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ah-cross-monitor-mirror
+  cancel-in-progress: true
+
+env:
+  SOURCE_URL: "https://ah-cross-autolearn-production-4c96.up.railway.app/monitor.txt"
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout mirror repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Railway monitor
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --location \
+            --retry 3 \
+            --retry-delay 3 \
+            --connect-timeout 10 \
+            --max-time 30 \
+            "$SOURCE_URL" \
+            -o monitor-source.json
+
+      - name: Validate and publish credential-safe snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          src = json.loads(Path("monitor-source.json").read_text(encoding="utf-8"))
+
+          required = ("model_version", "build", "overall_status", "database", "scheduler", "official_final_counts")
+          missing = [k for k in required if k not in src]
+          if missing:
+              raise SystemExit(f"monitor payload missing required keys: {missing}")
+          if src.get("model_version") != "0.4.0":
+              raise SystemExit(f"unexpected model_version: {src.get('model_version')!r}")
+
+          # Explicit allow-list: never mirror arbitrary future fields from production.
+          safe = {
+              "mirror": "AH-Cross public read-only status",
+              "mirrored_at": datetime.now(timezone.utc).isoformat(),
+              "source_generated_at": src.get("generated_at"),
+              "model_version": src.get("model_version"),
+              "build": src.get("build"),
+              "overall_status": src.get("overall_status"),
+              "database": src.get("database"),
+              "scheduler": src.get("scheduler"),
+              "official_final_counts": src.get("official_final_counts"),
+              "performance": src.get("performance"),
+              "post_match_learning": src.get("post_match_learning"),
+              "frozen_rules_integrity": src.get("frozen_rules_integrity"),
+              "daily_requests": src.get("daily_requests"),
+          }
+
+          Path("monitor.json").write_text(
+              json.dumps(safe, ensure_ascii=False, indent=2, sort_keys=False) + "\n",
+              encoding="utf-8",
+          )
+
+          compact = {
+              "model_version": safe["model_version"],
+              "build": safe["build"],
+              "overall_status": safe["overall_status"],
+              "source_generated_at": safe["source_generated_at"],
+              "mirrored_at": safe["mirrored_at"],
+              "official_final_counts": safe["official_final_counts"],
+          }
+          Path("health.json").write_text(
+              json.dumps(compact, ensure_ascii=False, separators=(",", ":")) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          rm -f monitor-source.json
+
+      - name: Commit only when status changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "ah-cross-monitor-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add monitor.json health.json
+          if git diff --cached --quiet; then
+            echo "No monitor changes."
+            exit 0
+          fi
+          git commit -m "chore: refresh AH-Cross monitor"
+          git push
