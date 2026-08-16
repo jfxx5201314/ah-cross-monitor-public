@@ -1,7 +1,7 @@
 {
   "mirror": "AH-Cross public read-only status",
-  "mirrored_at": "2026-08-16T04:20:27.885667+00:00",
-  "source_generated_at": "2026-08-16T04:20:27.628775+00:00",
+  "mirrored_at": "2026-08-16T05:00:07.731493+00:00",
+  "source_generated_at": "2026-08-16T05:00:07.482096+00:00",
   "model_version": "0.4.0",
   "build": "V0.4.0-YDC2",
   "overall_status": "OK",
@@ -26,26 +26,26 @@
           "ok": true
         },
         "refresh": {
-          "age_minutes": 20.1,
+          "age_minutes": 0.1,
           "ok": true
         },
         "settlement": {
-          "age_minutes": 22.8,
+          "age_minutes": 2.4,
           "ok": true
         },
         "market_rescan": {
-          "age_minutes": 20.1,
+          "age_minutes": 59.8,
           "ok": true
         }
       },
       "single_replica_required_for_internal_scheduler": true
     },
-    "heartbeat_at": "2026-08-16T04:20:19.578926+00:00",
+    "heartbeat_at": "2026-08-16T05:00:01.128327+00:00",
     "daily_scan_at": "2026-08-16T04:00:19.496885+00:00",
-    "refresh_at": "2026-08-16T04:00:19.517230+00:00",
-    "final_sweep_at": "2026-08-16T04:20:19.586325+00:00",
-    "settlement_at": "2026-08-16T03:57:38.171530+00:00",
-    "multisource_sweep_at": "2026-08-16T04:00:19.504914+00:00"
+    "refresh_at": "2026-08-16T05:00:01.159830+00:00",
+    "final_sweep_at": "2026-08-16T05:00:01.165958+00:00",
+    "settlement_at": "2026-08-16T04:57:41.122954+00:00",
+    "multisource_sweep_at": "2026-08-16T05:00:01.140099+00:00"
   },
   "official_final_counts": {
     "total": 115,
@@ -253,7 +253,7 @@
     "enabled": true,
     "guard_enabled": true,
     "profile_version": "PML1",
-    "generated_at": "2026-08-16T03:57:38.121951+00:00",
+    "generated_at": "2026-08-16T04:57:41.074329+00:00",
     "source_rows": 612,
     "diagnosed_rows": 612,
     "label_counts": {
@@ -453,7 +453,7 @@
     "mismatches": {}
   },
   "daily_requests": {
-    "used": 29,
+    "used": 31,
     "limit": 70000,
     "provider_remaining_recent": null
   }
