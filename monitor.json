@@ -1,7 +1,7 @@
 {
   "mirror": "AH-Cross public read-only status",
-  "mirrored_at": "2026-08-16T09:42:10.465594+00:00",
-  "source_generated_at": "2026-08-16T09:42:10.157348+00:00",
+  "mirrored_at": "2026-08-16T10:00:10.583574+00:00",
+  "source_generated_at": "2026-08-16T10:00:10.262227+00:00",
   "model_version": "0.4.0",
   "build": "V0.4.0-YDC2",
   "overall_status": "OK",
@@ -18,33 +18,33 @@
       "scheduler_enabled": true,
       "checks": {
         "scheduler_heartbeat": {
-          "age_minutes": 2.0,
+          "age_minutes": 5.0,
           "ok": true
         },
         "final_sweep": {
-          "age_minutes": 2.0,
+          "age_minutes": 5.0,
           "ok": true
         },
         "refresh": {
-          "age_minutes": 12.0,
+          "age_minutes": 30.0,
           "ok": true
         },
         "settlement": {
-          "age_minutes": 14.3,
+          "age_minutes": 2.3,
           "ok": true
         },
         "market_rescan": {
-          "age_minutes": 162.1,
+          "age_minutes": 180.1,
           "ok": true
         }
       },
       "single_replica_required_for_internal_scheduler": true
     },
-    "heartbeat_at": "2026-08-16T09:40:11.265875+00:00",
+    "heartbeat_at": "2026-08-16T09:55:11.313562+00:00",
     "daily_scan_at": "2026-08-16T07:00:06.902694+00:00",
     "refresh_at": "2026-08-16T09:30:11.241183+00:00",
-    "final_sweep_at": "2026-08-16T09:40:11.275614+00:00",
-    "settlement_at": "2026-08-16T09:27:51.201179+00:00",
+    "final_sweep_at": "2026-08-16T09:55:11.322668+00:00",
+    "settlement_at": "2026-08-16T09:57:52.056829+00:00",
     "multisource_sweep_at": "2026-08-16T09:30:11.220641+00:00"
   },
   "official_final_counts": {
@@ -253,7 +253,7 @@
     "enabled": true,
     "guard_enabled": true,
     "profile_version": "PML1",
-    "generated_at": "2026-08-16T09:27:51.142891+00:00",
+    "generated_at": "2026-08-16T09:57:52.003291+00:00",
     "source_rows": 612,
     "diagnosed_rows": 612,
     "label_counts": {
@@ -453,7 +453,7 @@
     "mismatches": {}
   },
   "daily_requests": {
-    "used": 41,
+    "used": 42,
     "limit": 70000,
     "provider_remaining_recent": null
   }
