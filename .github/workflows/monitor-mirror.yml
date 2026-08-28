@@ -1,0 +1,246 @@
+name: AH-Cross Auto Recovery + Live Mirror V3
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/monitor-mirror.yml"
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+    - cron: "17 0 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ah-cross-auto-recovery-live-v3
+  cancel-in-progress: true
+
+env:
+  BASE_URL: "https://ah-cross-autolearn-production-4c96.up.railway.app"
+  EXPECTED_MODEL_VERSION: "0.4.0"
+  EXPECTED_BUILD: "V0.4.0-YDC2"
+
+jobs:
+  recover-and-mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout mirror repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Auto-recover production model
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.schedule == '17 0 * * *'
+        shell: bash
+        env:
+          ADMIN_TOKEN: ${{ secrets.AH_CROSS_ADMIN_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ADMIN_TOKEN:-}" ]; then
+            echo "AH_CROSS_ADMIN_TOKEN is not configured."
+            exit 1
+          fi
+
+          post_admin() {
+            local path="$1"
+            local name="$2"
+            local body="/tmp/${name}.json"
+            local code
+            echo "Running ${name} ..."
+            code=$(curl \
+              --silent \
+              --show-error \
+              --location \
+              --retry 3 \
+              --retry-all-errors \
+              --retry-delay 3 \
+              --connect-timeout 10 \
+              --max-time 180 \
+              -X POST \
+              -H "accept: application/json" \
+              -H "X-Admin-Token: ${ADMIN_TOKEN}" \
+              -o "$body" \
+              -w "%{http_code}" \
+              "${BASE_URL}${path}")
+            echo "${name}: HTTP ${code}"
+            if [[ ! "$code" =~ ^2 ]]; then
+              echo "${name} failed. Response:"
+              cat "$body" || true
+              exit 1
+            fi
+          }
+
+          post_admin "/api/admin/run-daily" "run-daily"
+          post_admin "/api/admin/refresh" "refresh"
+          post_admin "/api/admin/final-sweep" "final-sweep"
+          post_admin "/api/admin/settle" "settle"
+          post_admin "/api/admin/run-multisource" "run-multisource"
+
+      - name: Fetch best available production monitor
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          NONCE="$(date +%s)"
+          printf '%s\n' "$NONCE" > nonce.txt
+
+          endpoints=(
+            "/monitor.txt"
+            "/api/monitor"
+            "/api/validation"
+            "/api/status"
+          )
+
+          found=""
+          for path in "${endpoints[@]}"; do
+            echo "Trying ${path} ..."
+            code=$(curl \
+              --silent \
+              --show-error \
+              --location \
+              --connect-timeout 10 \
+              --max-time 45 \
+              -o monitor-source.tmp \
+              -w "%{http_code}" \
+              "${BASE_URL}${path}?nonce=${NONCE}" || true)
+            echo "${path}: HTTP ${code:-curl_error}"
+            if [[ "${code:-}" =~ ^2 ]]; then
+              if python - <<'PY'
+import json
+from pathlib import Path
+p = Path("monitor-source.tmp")
+try:
+    obj = json.loads(p.read_text(encoding="utf-8"))
+except Exception:
+    raise SystemExit(1)
+if not isinstance(obj, dict):
+    raise SystemExit(1)
+PY
+              then
+                mv monitor-source.tmp monitor-source.json
+                printf '%s\n' "$path" > source-endpoint.txt
+                found="1"
+                break
+              fi
+            fi
+          done
+
+          rm -f monitor-source.tmp
+          if [ -z "$found" ]; then
+            echo "No usable public production status endpoint found."
+            exit 1
+          fi
+
+      - name: Build credential-safe live snapshot
+        if: always() && hashFiles('monitor-source.json') != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+import json, os
+from datetime import datetime, timezone
+from pathlib import Path
+
+src = json.loads(Path("monitor-source.json").read_text(encoding="utf-8"))
+endpoint = Path("source-endpoint.txt").read_text(encoding="utf-8").strip()
+nonce = Path("nonce.txt").read_text(encoding="utf-8").strip()
+now = datetime.now(timezone.utc).isoformat()
+
+expected_version = os.environ["EXPECTED_MODEL_VERSION"]
+expected_build = os.environ["EXPECTED_BUILD"]
+
+model_version = src.get("model_version") or src.get("version")
+build = src.get("build") or src.get("build_tag")
+overall_status = src.get("overall_status") or src.get("status") or "UNKNOWN"
+database = src.get("database") if isinstance(src.get("database"), dict) else {}
+scheduler = src.get("scheduler") if isinstance(src.get("scheduler"), dict) else {}
+counts = src.get("official_final_counts") if isinstance(src.get("official_final_counts"), dict) else {}
+
+if model_version is not None and str(model_version) != expected_version:
+    raise SystemExit(f"unexpected model_version: {model_version!r}")
+if build is not None and str(build) != expected_build:
+    raise SystemExit(f"unexpected build: {build!r}")
+
+safe = {
+    "mirror_kind": "AH-Cross public read-only live monitor V3",
+    "source_endpoint": endpoint,
+    "mirror_nonce": nonce,
+    "mirrored_at": now,
+    "source_generated_at": src.get("generated_at") or src.get("timestamp") or src.get("now"),
+    "model_version": model_version,
+    "build": build,
+    "overall_status": overall_status,
+    "database": database,
+    "scheduler": scheduler,
+    "official_final_counts": counts,
+    "performance": src.get("performance") if isinstance(src.get("performance"), dict) else {},
+    "post_match_learning": src.get("post_match_learning") if isinstance(src.get("post_match_learning"), dict) else {},
+    "frozen_rules_integrity": src.get("frozen_rules_integrity") if isinstance(src.get("frozen_rules_integrity"), dict) else {},
+    "daily_requests": src.get("daily_requests") if isinstance(src.get("daily_requests"), dict) else {},
+}
+
+Path("snapshot.json").write_text(json.dumps(safe, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+db = safe["database"]
+status = {
+    "source_endpoint": endpoint,
+    "mirror_nonce": nonce,
+    "mirrored_at": now,
+    "source_generated_at": safe["source_generated_at"],
+    "model_version": safe["model_version"],
+    "build": safe["build"],
+    "overall_status": safe["overall_status"],
+    "database": {
+        "connected": db.get("connected"),
+        "backend": db.get("backend"),
+        "persistent": db.get("persistent"),
+        "guard": db.get("guard"),
+    },
+    "official_final_counts": safe["official_final_counts"],
+}
+Path("status.json").write_text(json.dumps(status, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+
+lines = [
+    "AH-Cross V0.4.0-YDC2 live monitor V3",
+    f"source_endpoint={endpoint}",
+    f"mirror_nonce={nonce}",
+    f"mirrored_at={now}",
+    f"source_generated_at={safe['source_generated_at']}",
+    f"model_version={safe['model_version']}",
+    f"build={safe['build']}",
+    f"overall_status={safe['overall_status']}",
+    "official_final_counts=" + json.dumps(safe["official_final_counts"], ensure_ascii=False),
+]
+Path("chatgpt.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+PY
+          rm -f monitor-source.json source-endpoint.txt
+
+      - name: Publish machine-readable live branch
+        if: always() && hashFiles('snapshot.json') != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ahcross-live
+          cp chatgpt.txt /tmp/ahcross-live/chatgpt.txt
+          cp snapshot.json /tmp/ahcross-live/snapshot.json
+          cp status.json /tmp/ahcross-live/status.json
+          cp nonce.txt /tmp/ahcross-live/nonce.txt
+
+          git config user.name "ah-cross-monitor-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git checkout --orphan live-v3
+          git rm -rf . >/dev/null 2>&1 || true
+          rm -rf .github README.md monitor.json health.json 2>/dev/null || true
+
+          cp /tmp/ahcross-live/chatgpt.txt .
+          cp /tmp/ahcross-live/snapshot.json .
+          cp /tmp/ahcross-live/status.json .
+          cp /tmp/ahcross-live/nonce.txt .
+
+          git add chatgpt.txt snapshot.json status.json nonce.txt
+          git commit -m "Update AH-Cross live monitor V3"
+          git push origin HEAD:live --force
