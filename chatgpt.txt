@@ -1,0 +1,9 @@
+AH-Cross V0.4.0-YDC2 live monitor V3
+source_endpoint=/api/validation
+mirror_nonce=1788327859
+mirrored_at=2026-09-02T05:44:23.510332+00:00
+source_generated_at=None
+model_version=0.4.0
+build=None
+overall_status=UNKNOWN
+official_final_counts={"total": 821, "formal": 26, "backup": 795, "settled": 821, "pending": 0}
